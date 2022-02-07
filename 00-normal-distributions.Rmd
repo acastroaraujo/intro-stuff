@@ -8,7 +8,7 @@ bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, fig.align = "center", out.width = "95%")
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center")
 
 library(tidyverse)
 library(latex2exp)
@@ -54,7 +54,7 @@ body {
 }
 ```
 
-*The purpose of this notebook is to build some intuition behind normal distributions on how to work with them in the context of the Null Hypothesis Significance Testing framework (NHST).*
+*The purpose of this notebook is to build some intuition behind normal distributions on how to work with them in the context of the Null Hypothesis Significance Testing framework (NHST). Skip to the last section if you only want some intuition behind the math in the formula for the normal distribution*
 
 <font size="2">
 
@@ -68,7 +68,7 @@ body {
 
 Before getting started, let's think about the arbitrary distribution shown in the graph below. Think of this as a *probability function.*
 
-```{r}
+```{r, out.width = "90%"}
 p <- runif(5)
 p <- p / sum(p)
 p <- round(p, 2)
@@ -114,7 +114,7 @@ The normal distribution has two parameters: (1) the **mean,** or $\mu$, which te
 
 Here's a graph for the normal distribution when $\mu = 0$ and $\sigma = 1$. This is also known as the **standard normal distribution***.*
 
-```{r}
+```{r, out.width = "90%"}
 template(-5, 5) + 
   geom_function(fun = dnorm, n = 1e3) + 
   labs(title = TeX(r'(The normal distribution with $\mu = 0$ and $\sigma = 1$)'), 
@@ -138,7 +138,7 @@ Note that in some cases the densities can be larger than 1. This is OK. Remember
 
 For example:
 
-```{r}
+```{r, out.width = "90%"}
 template(0, 10) + 
   geom_function(fun = \(x) dnorm(x, mean = 5, sd = 1/4), n = 1e3) +
   geom_hline(yintercept = 1, linetype = "dashed") +
@@ -155,7 +155,7 @@ Every normal distribution exhibits the following behavior:
 
 -   The probability that $x$ is below the mean ($x \leq \mu$) is also 50%.
 
-```{r, layout="l-page"}
+```{r, layout="l-page", fig.height=4, fig.width=10}
 p1 <- template(-5, 5) +
   geom_function(fun = dnorm) + 
   geom_function_shade(-1, 1) + 
@@ -198,7 +198,7 @@ The **sampling distribution** is the set of possible sample "statistics" (e.g., 
 
 <aside>
 
-The main assumption behind the CLT is that the sample size is *big enough*.
+The main assumption behind the CLT is that the sample size is *big enough*. If we wanted to work with smaller sample sizes we might consider using Student's $t$-distribution instead.
 
 </aside>
 
@@ -216,9 +216,9 @@ This figure taken from @lynch2013 [pp. 84].
 
 What is incredible about the CLT is that *the z-score of the sample mean* behaves exactly like the standard normal distribution *regardless* of the distribution of the original variable. In other words, if we were to repeat the sampling procedure many many times, each time calculating the average, we would end up collecting a list of values patterned like a normal distribution.
 
-The following graphs shows the sampling distribution (right panel) I constructed by taking 100,000 samples of size 40 from the original population (left panel).
+The following graphs shows a sampling distribution (right panel) that I constructed by taking 100,000 samples of size 40 from the original population (left panel).
 
-```{r, layout="l-page", out.width="100%"}
+```{r, layout="l-page", fig.height=3, fig.width=10, cache=TRUE}
 library(patchwork)
 
 fake_data <- round(rbeta(1e5, 1, 3) * 100)
@@ -257,17 +257,17 @@ p2 <- df |>
   ggplot(aes(avg)) + 
   geom_histogram(color = "white") +
   geom_vline(xintercept = mean(fake_data), color = "red") + 
-  labs(title = "Sampling Distribution", caption = "built with 100,000 samples,\neach with a size of 40", y = "Frequency")
+  labs(title = "Sampling Distribution", y = "Frequency")
 
 
 p1 + p2
 ```
 
-In the real world we don't have access to the whole population. We also don't have access to the sampling distribution (i.e., we don't have enough money to sample the population more than once). However, *we can estimate the standard deviation of the sampling distribution which we call the* **standard error.**
+Note that in the real world we don't have access to the whole population. We also don't have access to the sampling distribution (i.e., we don't have enough money to sample the population more than once). However, *we can estimate the standard deviation of the sampling distribution which we call the* **standard error.**
 
 ## Null hypothesis testing
 
-Because we don't know the mean of the population ($\mu$), we can instead compare our sample average to a different value which we'll call a *null hypothesis* ($H_0$).
+Because we don't know the mean of the population ($\mu$), we usually compare our sample average to a different value which we'll call the *null hypothesis* ($H_0$).
 
 The hypothesis testing framework consists on the following five steps:
 
@@ -283,7 +283,7 @@ The hypothesis testing framework consists on the following five steps:
 
     The $p$-value is the probability that, under the null hypothesis, we observe a value of the test statistic at least as extreme as the one we actually observed.
 
-5.  We reject the null hypothesis if the $p$-value is less than or equal to the confidence level $\alpha$. Otherwise, we retain the null hypothesis (i.e., we fail to reject the null hypothesis).
+5.  We reject the null hypothesis if the $p$-value is less than or equal to the confidence level $\alpha$. Otherwise, we retain the null hypothesis (i.e., we *fail to reject* the null hypothesis).
 
     The level of confidence represents the probability of false rejection if the null hypothesis is true, which is also called a *type I error* (or *false positive*). Researchers can specify the degree of type I error, but it is not possible to directly control *type II error* (or *false negative*).
 
@@ -303,7 +303,7 @@ $$
 f(x) = (x - \phi)^2
 $$
 
-```{r}
+```{r, out.width = "90%"}
 template(-1, 7) +
   geom_function(fun = \(x) (x - 3)^2) 
 ```
@@ -316,24 +316,24 @@ This is how it looks when $\phi = 3$
 
 </aside>
 
-But the normal distribution is more like an *upside-down parabola.* We get something like this by multiplying by negative one. Let's make $\phi = 0$ as well.
+But the normal distribution is more like an *upside-down parabola.* We get something like this by *multiplying by negative one*. Let's make $\phi = 0$ as well.
 
 $$
 f(x) = -x^2  
 $$
 
-```{r}
+```{r, out.width = "90%"}
 template() +
   geom_function(fun = \(x) -x^2)
 ```
 
-This is looking closer, except that probability densities can't be negative. To ensure the $f(x)$ is never negative we use exponents.
+This is looking closer, except that *probability densities can't be negative.* To ensure the $f(x)$ is never negative we use **exponents**.
 
 $$
 f(x) = e^{-x^2}
 $$
 
-```{r}
+```{r, out.width = "90%"}
 template() +
   geom_function(fun = \(x) exp(-(x)^2))
 ```
@@ -354,7 +354,7 @@ $$
 
 This gives us
 
-```{r}
+```{r, out.width = "90%"}
 template() +
   geom_function(fun = \(x) (1/sqrt(pi)) * exp(-(x)^2)) +
   labs(title = "Standard normal distribution", 
@@ -362,17 +362,16 @@ template() +
 
 ```
 
-But we're not there yet note that, we are still missing the parameter that tells us how dispersed (or concentrated) the distribution is. That is, we are missing the standard deviation $\sigma$.
+But we're not there yet. We are still missing the parameter that tells us how dispersed (or concentrated) the distribution is. That is, we haven't included the standard deviation $\sigma$.
 
-If we want to add *that*, we need to *add* it in two places for it to still behave according to the rules of probability.
+If we want to add *that*, we need to add it in two places.
 
 $$
 f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\bigg(- \frac{(x - \mu)^2}{2 \sigma^2}\bigg)
 $$
 
-```{r}
+```{r, out.width = "90%"}
 template(-5, 15) +
   geom_function(fun = \(x) dnorm(x, 5, 3)) + 
   labs(title = TeX(r"(Normal Distribution with $\mu = 5$ and $\sigma = 3$)"))
-
 ```
